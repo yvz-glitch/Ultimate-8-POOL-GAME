@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>8-Ball Pool</title>
+<meta name="description" content="Classic 8-Ball Pool vs AI. Touch to aim, tap to shoot!"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ══ MENU ══ -->
+<div class="screen" id="sMenu">
+  <div class="mfelt"></div>
+  <div class="mlogo">
+    <div class="m8"></div>
+    <h1>8 · BALL</h1>
+    <div class="msub">Classic Pool · vs AI</div>
+  </div>
+  <div class="mbtns">
+    <div class="dlabel">AI Difficulty</div>
+    <div class="drow">
+      <button class="dbtn" data-d="easy">Easy</button>
+      <button class="dbtn on" data-d="medium">Medium</button>
+      <button class="dbtn" data-d="hard">Hard</button>
+    </div>
+    <button class="mbtn btn-go" id="btnPlay">▶ Play Now</button>
+    <button class="mbtn btn-how" id="btnHow">Controls &amp; Rules</button>
+  </div>
+  <div class="mver">v5.0 · Turbo Edition</div>
+</div>
+
+<!-- ══ HOW TO ══ -->
+<div class="screen off" id="sHow">
+  <div class="hbox">
+    <h2>Controls &amp; Rules</h2>
+    <div class="rrow"><span class="ric">🖱️</span><span><b>Mouse / Touch</b> — drag around the cue ball to aim. The cue rotates to face your finger or cursor.</span></div>
+    <div class="rrow"><span class="ric">⬆️⬇️</span>
+      <div>
+        <b>W / S keys</b> — move the cue ball forward / backward along the aim line.
+        <div class="krow"><span class="key">W</span><span style="color:rgba(245,230,200,.4);font-size:12px">move cue forward</span></div>
+        <div class="krow"><span class="key">S</span><span style="color:rgba(245,230,200,.4);font-size:12px">pull cue back</span></div>
+      </div>
+    </div>
+    <div class="rrow"><span class="ric">⚡</span>
+      <div>
+        <b>SPACE</b> — hold to charge power, release to shoot!
+        <div class="krow"><span class="key">SPACE</span><span style="color:rgba(245,230,200,.4);font-size:12px">hold &amp; release</span></div>
+      </div>
+    </div>
+    <div class="rrow"><span class="ric">📱</span><span><b>Mobile</b> — drag to aim, tap to shoot. Use ▲▼ arrows to adjust power, then tap <b>SHOOT</b>.</span></div>
+    <div class="rrow"><span class="ric">🎱</span><span><b>First pocket</b> decides your group — <b>solids</b> (1–7) or <b>stripes</b> (9–15).</span></div>
+    <div class="rrow"><span class="ric">8️⃣</span><span>Sink the <b>8-ball last</b> after clearing your group to win. Sinking it early = instant loss!</span></div>
+    <div class="rrow"><span class="ric">⚠️</span><span><b>Fouls</b> (scratch / wrong ball first) give your opponent ball-in-hand.</span></div>
+    <div class="rrow"><span class="ric">📊</span><span>Side bars show each player's <b>pocketed balls</b> with a rolling animation.</span></div>
+    <div class="rrow"><span class="ric">✨</span><span>Pull off <b>bank shots &amp; combos</b> for trickshot badges!</span></div>
+    <button class="mbtn btn-go" id="btnHowBack" style="margin-top:12px">Got It — Let's Play!</button>
+  </div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div class="screen off" id="sGame">
+  <div id="topbar">
+    <div class="pcard act" id="pc0">
+      <div class="pclabel">You</div>
+      <div class="pcname">PLAYER</div>
+      <div class="pctype" id="pt0"><span style="font-size:9px;color:rgba(245,230,200,.2)">TBD</span></div>
+    </div>
+    <div class="chud">
+      <div class="cturn" id="cturn">Break Shot</div>
+      <div class="cshot">Shot <span id="cshotnum">0</span></div>
+    </div>
+    <div class="pcard" id="pc1">
+      <div class="pclabel">AI</div>
+      <div class="pcname" id="ainame">MEDIUM</div>
+      <div class="pctype" id="pt1"><span style="font-size:9px;color:rgba(245,230,200,.2)">TBD</span></div>
+    </div>
+  </div>
+
+  <!-- game area: left tracker | canvas | right tracker -->
+  <div id="gamearea">
+
+    <!-- Left side: Player 0 ball tracker -->
+    <div class="sidetrack left" id="sidetrack0">
+      <!-- built by JS -->
+    </div>
+
+    <!-- Main canvas area -->
+    <div id="cwrap">
+      <canvas id="gc"></canvas>
+      <canvas id="oc"></canvas>
+
+      <div id="aitag">AI Calculating…</div>
+      <div id="foultag">FOUL!</div>
+      <div id="tricktag">🔥 TRICKSHOT!</div>
+      <div id="placehint">Tap to place cue ball</div>
+
+      <!-- spacebar ring -->
+      <div id="spacehold">
+        <div id="spacering">
+          <svg viewBox="0 0 48 48" width="52" height="52">
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#1a9e4a"/>
+                <stop offset="50%" stop-color="#f0c040"/>
+                <stop offset="100%" stop-color="#e03030"/>
+              </linearGradient>
+            </defs>
+            <circle class="bg-ring" cx="24" cy="24" r="22"/>
+            <circle class="prog-ring" id="progring" cx="24" cy="24" r="22"/>
+          </svg>
+        </div>
+        <div id="spacelabel">HOLD SPACE</div>
+      </div>
+
+      <!-- keyboard hint (desktop only) -->
+      <div id="keyshint">
+        <div class="khrow"><span class="kh">W</span><span>Forward</span></div>
+        <div class="khrow"><span class="kh">S</span><span>Back</span></div>
+        <div class="khrow"><span class="kh">⎵</span><span>Shoot</span></div>
+      </div>
+    </div>
+
+    <!-- Right side: AI (Player 1) ball tracker -->
+    <div class="sidetrack right" id="sidetrack1">
+      <!-- built by JS -->
+    </div>
+
+  </div><!-- /gamearea -->
+
+  <div id="botbar">
+    <!-- Hidden pot rows (legacy, side tracks replace them visually) -->
+    <div style="display:none" id="pot0"></div>
+    <div style="display:none" id="pot1"></div>
+
+    <!-- Power controls -->
+    <div id="pwrbox">
+      <div class="pwrlabel">PWR</div>
+      <!-- Mobile power arrows (shown on touch) -->
+      <div id="pwr-arrows">
+        <button class="pwr-arrow-btn" id="pwrBtnUp">▲</button>
+        <button class="pwr-arrow-btn" id="pwrBtnDown">▼</button>
+      </div>
+      <div id="pwrtrack"><div id="pwrfill"></div></div>
+      <div id="pwrval">70</div>
+    </div>
+
+    <!-- Mobile shoot button -->
+    <button id="shootbtn">⚡ SHOOT</button>
+
+    <div style="display:flex;gap:6px;flex-shrink:0">
+      <button class="ibtn" id="btnMenu2">Menu</button>
+      <button class="ibtn" id="btnNew">New</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GAME OVER ══ -->
+<div id="goover">
+  <div id="gotitle">YOU WIN!</div>
+  <div id="gosub">8-Ball Sunk!</div>
+  <div class="gobts">
+    <button class="mbtn btn-go" id="goAgain">Play Again</button>
+    <button class="mbtn btn-how" id="goMenu">Main Menu</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
